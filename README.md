@@ -1,4 +1,5 @@
 # LegalMate AI – Smart Legal Aid Assistant
+🚀 **Live Demo:** [Open LegalMate AI](https://legalmate-ai-deploy.vercel.app/)
 
 An AI-powered legal information assistant built with Python, Flask, and the Groq API. It provides general legal information and document analysis for Indian law in plain, beginner-friendly English.
 
