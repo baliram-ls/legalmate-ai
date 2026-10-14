@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+  <!-- Page header -->
+  <div class="page-header mb-4">
+    <h1 class="page-title"><i class="bi bi-grid-1x2-fill me-2 text-navy"></i>Dashboard</h1>
+    <p class="page-subtitle">Welcome to LegalMate AI — your smart legal document assistant.</p>
+  </div>
+
+  {% if demo_mode %}
+  <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+    <div>
+      <strong>Demo Mode Active</strong> — No IBM watsonx.ai credentials found.
+      All AI results are clearly labeled as simulated. Add credentials to <code>.env</code> to enable real AI analysis.
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Stats cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-6 col-lg-4">
+      <div class="stat-card stat-card--blue">
+        <div class="stat-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+        <div class="stat-body">
+          <div class="stat-value" id="stat-total">{{ total_docs }}</div>
+          <div class="stat-label">Documents Uploaded</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-4">
+      <div class="stat-card stat-card--teal">
+        <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="stat-body">
+          <div class="stat-value" id="stat-analyzed">{{ analyzed_docs }}</div>
+          <div class="stat-label">Documents Analyzed</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-4">
+      <div class="stat-card stat-card--amber">
+        <div class="stat-icon"><i class="bi bi-exclamation-circle-fill"></i></div>
+        <div class="stat-body">
+          <div class="stat-value" id="stat-risks">{{ risk_count }}</div>
+          <div class="stat-label">Potential Risks Found</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="card lm-card mb-4">
+    <div class="card-body">
+      <h5 class="card-title mb-3"><i class="bi bi-lightning-charge-fill me-2 text-navy"></i>Quick Actions</h5>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('upload') }}" class="btn btn-primary-lm">
+          <i class="bi bi-cloud-upload-fill me-1"></i>Upload Document
+        </a>
+        <a href="{{ url_for('history') }}" class="btn btn-outline-lm">
+          <i class="bi bi-bar-chart-fill me-1"></i>View & Analyze Documents
+        </a>
+        <a href="{{ url_for('assistant') }}" class="btn btn-outline-lm">
+          <i class="bi bi-chat-dots-fill me-1"></i>Open Legal Assistant
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent activity -->
+  <div class="card lm-card">
+    <div class="card-body">
+      <h5 class="card-title mb-3"><i class="bi bi-clock-history me-2 text-navy"></i>Recent Document Activity</h5>
+      {% if recent_docs %}
+      <div class="table-responsive">
+        <table class="table lm-table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Type</th>
+              <th>Uploaded</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for doc in recent_docs %}
+            <tr>
+              <td>
+                <i class="bi bi-file-earmark-{% if doc.file_type == 'pdf' %}pdf{% elif doc.file_type == 'docx' %}word{% else %}text{% endif %}-fill me-1 text-navy"></i>
+                {{ doc.filename | truncate(40) }}
+              </td>
+              <td><span class="badge bg-secondary text-uppercase">{{ doc.file_type }}</span></td>
+              <td class="text-muted small">{{ doc.upload_date.strftime('%b %d, %Y %H:%M') }}</td>
+              <td>
+                {% if doc.status == 'analyzed' %}
+                <span class="badge bg-success">Analyzed</span>
+                {% else %}
+                <span class="badge bg-warning text-dark">Uploaded</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if doc.status == 'analyzed' %}
+                {% set latest_analysis = doc.analyses | sort(attribute='id') | last %}
+                <a href="{{ url_for('analyze', doc_id=doc.id) }}" class="btn btn-xs btn-outline-navy">
+                  <i class="bi bi-eye"></i> View
+                </a>
+                {% else %}
+                <a href="{{ url_for('analyze', doc_id=doc.id) }}" class="btn btn-xs btn-primary-lm">
+                  <i class="bi bi-cpu"></i> Analyze
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state py-4">
+        <i class="bi bi-inbox fs-1 text-muted"></i>
+        <p class="text-muted mt-2">No documents yet. <a href="{{ url_for('upload') }}">Upload your first document</a> to get started.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

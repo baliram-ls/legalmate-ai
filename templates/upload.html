@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Upload Document{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+  <div class="page-header mb-4">
+    <h1 class="page-title"><i class="bi bi-cloud-upload-fill me-2 text-navy"></i>Upload Document</h1>
+    <p class="page-subtitle">Upload a PDF, DOCX, or TXT file for AI-powered legal analysis.</p>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+      <div class="card lm-card">
+        <div class="card-body p-4">
+
+          <form method="POST" enctype="multipart/form-data" id="uploadForm">
+            <div class="upload-zone" id="dropZone">
+              <input type="file" name="document" id="fileInput"
+                     accept=".pdf,.docx,.txt" class="d-none" />
+              <i class="bi bi-file-earmark-arrow-up-fill upload-icon"></i>
+              <p class="upload-title">Drag & drop your file here</p>
+              <p class="upload-sub">or <button type="button" class="btn-link-inline"
+                 onclick="document.getElementById('fileInput').click()">browse to choose</button></p>
+              <p class="upload-hint">Supports <strong>PDF</strong>, <strong>DOCX</strong>, <strong>TXT</strong> · Max 16 MB</p>
+              <div id="filePreview" class="d-none mt-3">
+                <div class="selected-file">
+                  <i class="bi bi-file-earmark-check-fill me-2 text-success"></i>
+                  <span id="fileName"></span>
+                  <span id="fileSize" class="text-muted ms-2 small"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" class="btn btn-primary-lm" id="submitBtn" disabled>
+                <i class="bi bi-cpu me-1"></i>Upload &amp; Analyze
+              </button>
+              <a href="{{ url_for('dashboard') }}" class="btn btn-outline-lm">Cancel</a>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+      <div class="card lm-card mt-3">
+        <div class="card-body p-3">
+          <h6 class="mb-2"><i class="bi bi-info-circle me-1 text-navy"></i>What happens after upload?</h6>
+          <ol class="mb-0 small text-muted">
+            <li>We extract text from your document securely.</li>
+            <li>{% if demo_mode %}<span class="text-warning">Demo mode</span>: A simulated summary is generated.{% else %}IBM watsonx.ai generates a plain-English summary.{% endif %}</li>
+            <li>Our rule-based engine highlights potentially risky clauses.</li>
+            <li>You can then ask follow-up questions in the Legal Assistant.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}

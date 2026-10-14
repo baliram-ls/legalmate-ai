@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Analysis – {{ doc.filename }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+  <div class="page-header mb-4 d-flex flex-wrap align-items-start gap-2">
+    <div class="flex-grow-1">
+      <h1 class="page-title">
+        <i class="bi bi-file-earmark-text-fill me-2 text-navy"></i>
+        {{ doc.filename | truncate(50) }}
+      </h1>
+      <p class="page-subtitle">
+        Analyzed {{ analysis.analysis_date.strftime('%B %d, %Y at %H:%M') }} ·
+        <span class="badge bg-secondary text-uppercase">{{ doc.file_type }}</span>
+        {% if analysis.is_demo %}
+        <span class="badge bg-warning text-dark ms-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Demo Results</span>
+        {% else %}
+        <span class="badge bg-success ms-1"><i class="bi bi-lightning-charge-fill me-1"></i>IBM watsonx.ai</span>
+        {% endif %}
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('reanalyze', doc_id=doc.id) }}" class="btn btn-outline-lm btn-sm">
+        <i class="bi bi-arrow-clockwise me-1"></i>Re-analyze
+      </a>
+      <a href="{{ url_for('assistant') }}?doc_id={{ doc.id }}" class="btn btn-primary-lm btn-sm">
+        <i class="bi bi-chat-dots-fill me-1"></i>Ask Questions
+      </a>
+    </div>
+  </div>
+
+  {% if analysis.is_demo %}
+  <div class="alert alert-warning d-flex align-items-center mb-4">
+    <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+    <div>
+      <strong>Demo Results</strong> — The summary below is <em>simulated</em> and does not reflect real AI analysis.
+      The risk-clause detection uses rule-based pattern matching and is always available.
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Summary card -->
+  <div class="card lm-card mb-4">
+    <div class="card-header lm-card-header">
+      <i class="bi bi-card-text me-2"></i>Document Summary
+    </div>
+    <div class="card-body">
+      <p class="mb-0 lm-summary">{{ analysis.summary }}</p>
+    </div>
+  </div>
+
+  <!-- Risk findings -->
+  <div class="card lm-card mb-4">
+    <div class="card-header lm-card-header d-flex align-items-center justify-content-between">
+      <span><i class="bi bi-exclamation-circle-fill me-2"></i>Potential Risks &amp; Clauses</span>
+      <span class="badge bg-amber-lm">{{ analysis.findings | length }} found</span>
+    </div>
+    <div class="card-body">
+      {% set findings = analysis.findings %}
+      {% if findings %}
+        <div class="row g-3">
+          {% for f in findings %}
+          <div class="col-12 col-md-6">
+            <div class="finding-card finding-card--{{ f.severity }}">
+              <div class="finding-header">
+                <span class="finding-title">{{ f.title }}</span>
+                <span class="finding-badge finding-badge--{{ f.severity }}">
+                  {{ f.severity | upper }}
+                </span>
+              </div>
+              <p class="finding-explanation">{{ f.explanation }}</p>
+              <div class="finding-excerpt">
+                <i class="bi bi-quote me-1 opacity-50"></i>{{ f.excerpt }}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state py-3">
+          <i class="bi bi-shield-check fs-2 text-success"></i>
+          <p class="text-muted mt-2">No common risk clauses detected in this document.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Extracted text accordion -->
+  <div class="card lm-card">
+    <div class="card-header lm-card-header">
+      <i class="bi bi-file-text me-2"></i>Extracted Document Text
+      <span class="ms-2 text-muted small">({{ doc.text_content | length }} characters)</span>
+    </div>
+    <div class="card-body p-0">
+      <div class="accordion accordion-flush" id="textAccordion">
+        <div class="accordion-item border-0">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed lm-accordion-btn" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#textCollapse">
+              Show full document text
+            </button>
+          </h2>
+          <div id="textCollapse" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <pre class="extracted-text">{{ doc.text_content }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
